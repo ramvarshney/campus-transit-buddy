@@ -20,15 +20,10 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  optimizeDeps: {
-    include: ['leaflet'],
-  },
+  // Remove optimizeDeps include as we're not importing leaflet directly
   build: {
     commonjsOptions: {
-      include: [/leaflet/, /node_modules/],
-    },
-    rollupOptions: {
-      external: ['leaflet'],
+      include: [/node_modules/],
     }
   }
 }));

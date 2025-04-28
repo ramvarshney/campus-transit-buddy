@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 import { BusStop, RoutePoint } from "@/types";
 import "../styles/leaflet-styles.css";
-import "leaflet/dist/leaflet.css";
 
 // Define leaflet types without direct import
 interface LeafletMap {

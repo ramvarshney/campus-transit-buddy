@@ -27,5 +27,8 @@ export default defineConfig(({ mode }) => ({
     commonjsOptions: {
       include: ['leaflet', /node_modules/],
     },
+    rollupOptions: {
+      external: ['leaflet/dist/leaflet.css'],
+    }
   }
 }));

@@ -2,11 +2,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 import { BusStop, RoutePoint } from "@/types";
-// We'll dynamically import Leaflet
+import "../styles/leaflet-styles.css";
+// Import Leaflet types
 import type { Map as LeafletMap, Marker, LayerGroup, Polyline, Circle, DivIcon } from 'leaflet';
-
-// Import Leaflet CSS
-import 'leaflet/dist/leaflet.css';
 
 interface MapProps {
   busLocation?: {
@@ -34,14 +32,26 @@ export function Map({
   const notificationCircleRef = useRef<Circle | null>(null);
   const [hasNotified, setHasNotified] = useState(false);
   const [leaflet, setLeaflet] = useState<typeof import('leaflet') | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Import Leaflet dynamically
   useEffect(() => {
-    import('leaflet').then((L) => {
-      setLeaflet(L);
-    }).catch(err => {
-      console.error('Failed to load Leaflet:', err);
-    });
+    const loadLeaflet = async () => {
+      try {
+        const L = await import('leaflet');
+        setLeaflet(L);
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Failed to load Leaflet:', err);
+        toast({
+          title: "Error",
+          description: "Failed to load map library. Please refresh the page.",
+          variant: "destructive"
+        });
+      }
+    };
+    
+    loadLeaflet();
   }, []);
 
   // Initialize map
@@ -65,6 +75,11 @@ export function Map({
         mapRef.current = map;
       } catch (error) {
         console.error('Error initializing map:', error);
+        toast({
+          title: "Error",
+          description: "Failed to initialize map. Please check your console for details.",
+          variant: "destructive"
+        });
       }
     }
 
@@ -212,7 +227,7 @@ export function Map({
   return (
     <div className="relative w-full h-full">
       <div id="map" className="w-full h-full rounded-md overflow-hidden"></div>
-      {!leaflet && (
+      {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
           <div className="text-center">
             <p className="text-lg font-medium">Loading map...</p>

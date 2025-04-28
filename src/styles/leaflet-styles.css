@@ -1,0 +1,54 @@
+
+/* Basic Leaflet styles for map display */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  background-color: #f0f0f0;
+}
+
+.leaflet-control-container .leaflet-top,
+.leaflet-control-container .leaflet-bottom {
+  z-index: 10;
+}
+
+.leaflet-control-zoom {
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  background-clip: padding-box;
+}
+
+.leaflet-control-zoom a {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  background-color: white;
+  color: black;
+}
+
+.leaflet-popup-content-wrapper {
+  padding: 1px;
+  border-radius: 8px;
+  background: white;
+}
+
+.leaflet-popup-content {
+  margin: 10px;
+}
+
+.leaflet-popup-tip-container {
+  width: 20px;
+  height: 10px;
+  overflow: hidden;
+  position: relative;
+  margin: 0 auto;
+}
+
+.leaflet-popup-tip {
+  width: 10px;
+  height: 10px;
+  background: white;
+  transform: rotate(45deg);
+  margin: -5px auto 0;
+}

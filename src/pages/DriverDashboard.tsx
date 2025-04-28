@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ref, set, onValue } from "firebase/database";
@@ -119,11 +118,17 @@ export default function DriverDashboard() {
       
       // Create bus data
       const busData: Partial<Bus> = {
+        id: busId,
         name: busName,
         number: busNumber,
         driver: driverName,
         route: routeName,
         status: 'inactive',
+        location: {
+          lat: 0,
+          lng: 0,
+          timestamp: Date.now(),
+        },
         stops: [
           { id: 'stop1', name: 'Stop 1', location: { lat: 20.5937, lng: 78.9629 } },
           { id: 'stop2', name: 'Stop 2', location: { lat: 20.6037, lng: 78.9729 } },
@@ -131,7 +136,7 @@ export default function DriverDashboard() {
         ]
       };
       
-      // Save to Firebase
+      // Save to Firebase using set function
       await set(ref(database, `buses/${busId}`), busData);
       
       // Link driver to bus

@@ -20,9 +20,15 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ['leaflet', 'leaflet/dist/leaflet.css'],
+  },
+  ssr: {
+    external: ['leaflet', 'leaflet/dist/leaflet.css'],
+  },
   build: {
     rollupOptions: {
-      external: ['leaflet']
+      external: ['leaflet', 'leaflet/dist/leaflet.css'],
     }
   }
 }));

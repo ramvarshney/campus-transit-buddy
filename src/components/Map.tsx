@@ -31,7 +31,7 @@ export function Map({
   const stopsLayerRef = useRef<LayerGroup | null>(null);
   const notificationCircleRef = useRef<Circle | null>(null);
   const [hasNotified, setHasNotified] = useState(false);
-  const [leaflet, setLeaflet] = useState<typeof import('leaflet') | null>(null);
+  const [leaflet, setLeaflet] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Import Leaflet dynamically
@@ -40,7 +40,7 @@ export function Map({
       try {
         // Import leaflet dynamically to avoid SSR issues
         const L = await import('leaflet');
-        setLeaflet(L);
+        setLeaflet(L.default || L);
         setIsLoading(false);
       } catch (err) {
         console.error('Failed to load Leaflet:', err);

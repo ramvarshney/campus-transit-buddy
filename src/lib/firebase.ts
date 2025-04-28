@@ -3,18 +3,14 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  // Note: In a real application, you would add your Firebase configuration here
-  // This is a placeholder that will need to be replaced with your actual Firebase config
-  apiKey: "YOUR_API_KEY",
-  authDomain: "your-app.firebaseapp.com",
-  databaseURL: "https://your-app.firebaseio.com",
-  projectId: "your-app-id",
-  storageBucket: "your-app.appspot.com",
-  messagingSenderId: "your-messaging-sender-id",
-  appId: "your-app-id",
-  measurementId: "your-measurement-id"
+  apiKey: "AIzaSyCCF5kMPCYl-5S9wF4jt3CgtJK1tckang0",
+  authDomain: "lbustracking.firebaseapp.com",
+  projectId: "lbustracking",
+  storageBucket: "lbustracking.firebasestorage.app",
+  messagingSenderId: "818586857314",
+  appId: "1:818586857314:web:24253ac40c7932eee5463b",
+  databaseURL: "https://lbustracking-default-rtdb.firebaseio.com" // Adding this for Realtime Database
 };
 
 const app = initializeApp(firebaseConfig);

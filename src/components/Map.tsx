@@ -3,8 +3,38 @@ import { useEffect, useRef, useState } from 'react';
 import { toast } from "@/hooks/use-toast";
 import { BusStop, RoutePoint } from "@/types";
 import "../styles/leaflet-styles.css";
-// Import Leaflet types
-import type { Map as LeafletMap, Marker, LayerGroup, Polyline, Circle, DivIcon } from 'leaflet';
+import "leaflet/dist/leaflet.css";
+
+// Define leaflet types without direct import
+interface LeafletMap {
+  setView: (center: [number, number], zoom: number) => any;
+  remove: () => void;
+  distance: (latlng1: [number, number], latlng2: [number, number]) => number;
+  fitBounds: (bounds: any, options: any) => any;
+}
+
+interface LeafletMarker {
+  setLatLng: (latlng: [number, number]) => void;
+  bindPopup: (content: string) => any;
+  openPopup: () => void;
+  on: (event: string, handler: Function) => void;
+}
+
+interface LeafletLayerGroup {
+  addTo: (map: any) => any;
+  clearLayers: () => void;
+}
+
+interface LeafletCircle {
+  setLatLng: (latlng: [number, number]) => void;
+  addTo: (map: any) => any;
+}
+
+interface LeafletPolyline {
+  addTo: (map: any) => any;
+  getBounds: () => any;
+  remove: () => void;
+}
 
 interface MapProps {
   busLocation?: {
@@ -26,22 +56,56 @@ export function Map({
   onStopSelect 
 }: MapProps) {
   const mapRef = useRef<LeafletMap | null>(null);
-  const busMarkerRef = useRef<Marker | null>(null);
-  const routeLayerRef = useRef<Polyline | null>(null);
-  const stopsLayerRef = useRef<LayerGroup | null>(null);
-  const notificationCircleRef = useRef<Circle | null>(null);
+  const busMarkerRef = useRef<LeafletMarker | null>(null);
+  const routeLayerRef = useRef<LeafletPolyline | null>(null);
+  const stopsLayerRef = useRef<LeafletLayerGroup | null>(null);
+  const notificationCircleRef = useRef<LeafletCircle | null>(null);
   const [hasNotified, setHasNotified] = useState(false);
   const [leaflet, setLeaflet] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
 
   // Import Leaflet dynamically
   useEffect(() => {
+    // Only load once
+    if (leaflet) return;
+    
     const loadLeaflet = async () => {
       try {
-        // Import leaflet dynamically to avoid SSR issues
-        const L = await import('leaflet');
-        setLeaflet(L.default || L);
-        setIsLoading(false);
+        // Use a script tag to load leaflet globally
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+        script.crossOrigin = '';
+        
+        script.onload = () => {
+          // Access the global L object
+          const L = window.L;
+          setLeaflet(L);
+          setIsLoading(false);
+          console.log("Leaflet loaded successfully");
+        };
+        
+        script.onerror = (err) => {
+          console.error('Failed to load Leaflet script:', err);
+          toast({
+            title: "Error",
+            description: "Failed to load map library. Please refresh the page.",
+            variant: "destructive"
+          });
+        };
+        
+        document.head.appendChild(script);
+        
+        // Also add the CSS
+        if (!document.querySelector('link[href*="leaflet.css"]')) {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+          link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+          link.crossOrigin = '';
+          document.head.appendChild(link);
+        }
       } catch (err) {
         console.error('Failed to load Leaflet:', err);
         toast({
@@ -57,9 +121,9 @@ export function Map({
 
   // Initialize map
   useEffect(() => {
-    if (!leaflet) return; // Wait until Leaflet is loaded
+    if (!leaflet || !mapContainerRef.current) return; // Wait until Leaflet is loaded
     const L = leaflet;
-
+    
     if (!mapRef.current) {
       try {
         // Default center on a general area (can be adjusted)
@@ -74,6 +138,8 @@ export function Map({
         // Create layers for stops and route
         stopsLayerRef.current = L.layerGroup().addTo(map);
         mapRef.current = map;
+        
+        console.log("Map initialized successfully");
       } catch (error) {
         console.error('Error initializing map:', error);
         toast({
@@ -227,7 +293,7 @@ export function Map({
 
   return (
     <div className="relative w-full h-full">
-      <div id="map" className="w-full h-full rounded-md overflow-hidden"></div>
+      <div id="map" ref={mapContainerRef} className="w-full h-full rounded-md overflow-hidden"></div>
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
           <div className="text-center">
@@ -237,6 +303,13 @@ export function Map({
       )}
     </div>
   );
+}
+
+// Add this to the global Window interface
+declare global {
+  interface Window {
+    L: any;
+  }
 }
 
 export default Map;

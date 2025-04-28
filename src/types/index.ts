@@ -1,4 +1,3 @@
-
 export interface Bus {
   id: string;
   name: string;
@@ -21,8 +20,6 @@ export interface BusStop {
     lat: number;
     lng: number;
   };
-  arrivalTime?: string;
-  departureTime?: string;
   eta?: number;
 }
 

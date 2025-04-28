@@ -38,6 +38,7 @@ export function Map({
   useEffect(() => {
     const loadLeaflet = async () => {
       try {
+        // Import leaflet dynamically to avoid SSR issues
         const L = await import('leaflet');
         setLeaflet(L);
         setIsLoading(false);

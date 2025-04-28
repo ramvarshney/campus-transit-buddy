@@ -22,13 +22,14 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     include: ['leaflet'],
+    force: true,
   },
   build: {
     commonjsOptions: {
       include: ['leaflet', /node_modules/],
     },
     rollupOptions: {
-      external: ['leaflet/dist/leaflet.css'],
+      external: [],
     }
   }
 }));

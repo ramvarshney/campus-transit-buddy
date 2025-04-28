@@ -1,9 +1,12 @@
 
 import { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { toast } from "@/hooks/use-toast";
 import { BusStop, RoutePoint } from "@/types";
+// We'll dynamically import Leaflet
+import type { Map as LeafletMap, Marker, LayerGroup, Polyline, Circle, DivIcon } from 'leaflet';
+
+// Import Leaflet CSS
+import 'leaflet/dist/leaflet.css';
 
 interface MapProps {
   busLocation?: {
@@ -24,34 +27,45 @@ export function Map({
   routePoints = [], 
   onStopSelect 
 }: MapProps) {
-  const mapRef = useRef<L.Map | null>(null);
-  const busMarkerRef = useRef<L.Marker | null>(null);
-  const routeLayerRef = useRef<L.Polyline | null>(null);
-  const stopsLayerRef = useRef<L.LayerGroup | null>(null);
-  const notificationCircleRef = useRef<L.Circle | null>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const busMarkerRef = useRef<Marker | null>(null);
+  const routeLayerRef = useRef<Polyline | null>(null);
+  const stopsLayerRef = useRef<LayerGroup | null>(null);
+  const notificationCircleRef = useRef<Circle | null>(null);
   const [hasNotified, setHasNotified] = useState(false);
+  const [leaflet, setLeaflet] = useState<typeof import('leaflet') | null>(null);
+
+  // Import Leaflet dynamically
+  useEffect(() => {
+    import('leaflet').then((L) => {
+      setLeaflet(L);
+    }).catch(err => {
+      console.error('Failed to load Leaflet:', err);
+    });
+  }, []);
 
   // Initialize map
   useEffect(() => {
-    // Ensure leaflet is loaded before trying to use it
-    if (typeof L === 'undefined') {
-      console.error('Leaflet library is not loaded');
-      return;
-    }
+    if (!leaflet) return; // Wait until Leaflet is loaded
+    const L = leaflet;
 
     if (!mapRef.current) {
-      // Default center on a general area (can be adjusted)
-      const map = L.map("map").setView([20.5937, 78.9629], 5);
-      
-      // Add OpenStreetMap tile layer
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      }).addTo(map);
-      
-      // Create layers for stops and route
-      stopsLayerRef.current = L.layerGroup().addTo(map);
-      mapRef.current = map;
+      try {
+        // Default center on a general area (can be adjusted)
+        const map = L.map("map").setView([20.5937, 78.9629], 5);
+        
+        // Add OpenStreetMap tile layer
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Create layers for stops and route
+        stopsLayerRef.current = L.layerGroup().addTo(map);
+        mapRef.current = map;
+      } catch (error) {
+        console.error('Error initializing map:', error);
+      }
     }
 
     // Cleanup on unmount
@@ -61,12 +75,13 @@ export function Map({
         mapRef.current = null;
       }
     };
-  }, []);
+  }, [leaflet]);
 
   // Update bus location
   useEffect(() => {
+    if (!leaflet || !mapRef.current || !busLocation) return;
+    const L = leaflet;
     const map = mapRef.current;
-    if (!map || !busLocation) return;
 
     // Create or update bus marker
     if (busMarkerRef.current) {
@@ -124,12 +139,13 @@ export function Map({
         }
       }
     }
-  }, [busLocation, selectedStop, hasNotified]);
+  }, [busLocation, selectedStop, hasNotified, leaflet]);
 
   // Update stops on map
   useEffect(() => {
+    if (!leaflet || !mapRef.current || !stopsLayerRef.current) return;
+    const L = leaflet;
     const map = mapRef.current;
-    if (!map || !stopsLayerRef.current) return;
 
     // Clear existing stops
     stopsLayerRef.current.clearLayers();
@@ -162,12 +178,13 @@ export function Map({
         marker.openPopup();
       }
     });
-  }, [stops, selectedStop, onStopSelect]);
+  }, [stops, selectedStop, onStopSelect, leaflet]);
 
   // Update route path
   useEffect(() => {
+    if (!leaflet || !mapRef.current) return;
+    const L = leaflet;
     const map = mapRef.current;
-    if (!map) return;
 
     // Remove existing route
     if (routeLayerRef.current) {
@@ -178,7 +195,7 @@ export function Map({
     if (routePoints.length > 1) {
       const latLngs = routePoints.map((point) => [point.lat, point.lng]);
       
-      routeLayerRef.current = L.polyline(latLngs as L.LatLngExpression[], {
+      routeLayerRef.current = L.polyline(latLngs as [number, number][], {
         color: 'hsl(var(--primary))',
         weight: 4,
         opacity: 0.7,
@@ -190,11 +207,18 @@ export function Map({
         padding: [50, 50]
       });
     }
-  }, [routePoints]);
+  }, [routePoints, leaflet]);
 
   return (
     <div className="relative w-full h-full">
       <div id="map" className="w-full h-full rounded-md overflow-hidden"></div>
+      {!leaflet && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+          <div className="text-center">
+            <p className="text-lg font-medium">Loading map...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -33,6 +33,12 @@ export function Map({
 
   // Initialize map
   useEffect(() => {
+    // Ensure leaflet is loaded before trying to use it
+    if (typeof L === 'undefined') {
+      console.error('Leaflet library is not loaded');
+      return;
+    }
+
     if (!mapRef.current) {
       // Default center on a general area (can be adjusted)
       const map = L.map("map").setView([20.5937, 78.9629], 5);

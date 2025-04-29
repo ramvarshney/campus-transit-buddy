@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
 import { database } from "@/lib/firebase";
@@ -269,10 +268,10 @@ export default function StudentDashboard() {
           )}
         </div>
 
-        {/* Map Container */}
+        {/* Map Container with fixed height */}
         <div className="lg:col-span-2">
           <Card className="h-[70vh]">
-            <CardContent className="p-0">
+            <CardContent className="p-0 h-full">
               <Map 
                 busLocation={selectedBus?.location}
                 selectedStop={selectedStop || undefined}

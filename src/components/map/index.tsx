@@ -37,7 +37,7 @@ export function Map({
 
   return (
     <div className="relative w-full h-full">
-      <div id="map" ref={mapContainerRef} className="w-full h-full rounded-md overflow-hidden"></div>
+      <div id="map" ref={mapContainerRef} className="map-container rounded-md overflow-hidden"></div>
       <LoadingIndicator isLoading={isLoading} />
     </div>
   );

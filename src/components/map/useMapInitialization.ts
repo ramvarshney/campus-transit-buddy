@@ -17,23 +17,36 @@ export const useMapInitialization = (
   useEffect(() => {
     if (!leaflet || !mapContainerRef.current || mapInitialized) return; // Wait until Leaflet is loaded
     
+    const L = leaflet;
+    
+    // Ensure we don't initialize map until element is visible in DOM
+    if (!document.getElementById('map')) {
+      console.log("Map container not found in DOM, waiting...");
+      const checkDomReady = setTimeout(() => {
+        setIsLoading(!isLoading); // Toggle to force re-render
+      }, 200);
+      return () => clearTimeout(checkDomReady);
+    }
+    
     // Ensure map container has dimensions before initializing
     if (mapContainerRef.current.clientHeight < 10 || mapContainerRef.current.clientWidth < 10) {
       console.log("Map container has insufficient dimensions, waiting...");
       const checkDimensions = setTimeout(() => {
-        // Force re-render to check dimensions again
-        setIsLoading(!isLoading); // Fix: Pass a boolean instead of a function
-      }, 500);
+        setIsLoading(!isLoading); // Toggle to force re-render
+      }, 200);
       return () => clearTimeout(checkDimensions);
     }
-
-    const L = leaflet;
     
     try {
       console.log(`Initializing map with dimensions: ${mapContainerRef.current.clientWidth}x${mapContainerRef.current.clientHeight}`);
       
-      // Default center on a general area (can be adjusted)
-      const map = L.map(mapContainerRef.current, {
+      // Clear any existing map instance first to avoid conflicts
+      if (mapRef.current) {
+        mapRef.current.remove();
+      }
+      
+      // Default center on a general area (India)
+      const map = L.map('map', {
         attributionControl: true,
         zoomControl: true,
         minZoom: 2,
@@ -59,11 +72,6 @@ export const useMapInitialization = (
         description: "Failed to initialize map. Please check your console for details.",
         variant: "destructive"
       });
-    }
-
-    // Debug log to check container dimensions
-    if (mapContainerRef.current) {
-      console.log(`Map container dimensions: ${mapContainerRef.current.clientWidth}x${mapContainerRef.current.clientHeight}`);
     }
 
     // Cleanup on unmount

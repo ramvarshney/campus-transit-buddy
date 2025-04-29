@@ -26,14 +26,19 @@ export function Map({
     mapInitialized
   } = useMapInitialization(leaflet, isLoading, setIsLoading);
 
-  // Handle bus location updates (updated parameter order)
+  // Handle bus location updates
   useBusLocation(leaflet, mapRef, mapInitialized, busLocation, selectedStop);
   
-  // Handle stops on the map (updated parameter order)
+  // Handle stops on the map
   useStops(leaflet, mapRef, stopsLayerRef, stops, mapInitialized, selectedStop, onStopSelect);
   
   // Handle route display
   useRoute(leaflet, mapRef, routePoints, mapInitialized);
+
+  // Add debugging logs for container dimensions
+  console.log("Map container in render:", mapContainerRef.current ? 
+    `width: ${mapContainerRef.current.clientWidth}, height: ${mapContainerRef.current.clientHeight}` : 
+    "Not initialized yet");
 
   return (
     <div className="relative w-full h-full">

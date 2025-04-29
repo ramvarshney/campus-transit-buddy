@@ -1,5 +1,5 @@
 
-import { Map } from "@/components/Map";
+import { Map } from "@/components/map";
 import { useState } from "react";
 import { BusStop } from "@/types";
 

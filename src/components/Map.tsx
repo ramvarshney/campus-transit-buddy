@@ -62,6 +62,7 @@ export function Map({
   const [hasNotified, setHasNotified] = useState(false);
   const [leaflet, setLeaflet] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [mapInitialized, setMapInitialized] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
   // Import Leaflet dynamically
@@ -72,29 +73,35 @@ export function Map({
     const loadLeaflet = async () => {
       try {
         // Use a script tag to load leaflet globally
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-        script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
-        script.crossOrigin = '';
-        
-        script.onload = () => {
-          // Access the global L object
-          const L = window.L;
-          setLeaflet(L);
+        if (!document.querySelector('script[src*="leaflet.js"]')) {
+          const script = document.createElement('script');
+          script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+          script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+          script.crossOrigin = '';
+          
+          script.onload = () => {
+            // Access the global L object
+            const L = window.L;
+            setLeaflet(L);
+            setIsLoading(false);
+            console.log("Leaflet loaded successfully");
+          };
+          
+          script.onerror = (err) => {
+            console.error('Failed to load Leaflet script:', err);
+            toast({
+              title: "Error",
+              description: "Failed to load map library. Please refresh the page.",
+              variant: "destructive"
+            });
+          };
+          
+          document.head.appendChild(script);
+        } else {
+          // If script already exists, just set the leaflet reference
+          setLeaflet(window.L);
           setIsLoading(false);
-          console.log("Leaflet loaded successfully");
-        };
-        
-        script.onerror = (err) => {
-          console.error('Failed to load Leaflet script:', err);
-          toast({
-            title: "Error",
-            description: "Failed to load map library. Please refresh the page.",
-            variant: "destructive"
-          });
-        };
-        
-        document.head.appendChild(script);
+        }
         
         // Also add the CSS
         if (!document.querySelector('link[href*="leaflet.css"]')) {
@@ -120,33 +127,50 @@ export function Map({
 
   // Initialize map
   useEffect(() => {
-    if (!leaflet || !mapContainerRef.current) return; // Wait until Leaflet is loaded
+    if (!leaflet || !mapContainerRef.current || mapInitialized) return; // Wait until Leaflet is loaded
+    
+    // Ensure map container has dimensions before initializing
+    if (mapContainerRef.current.clientHeight < 10 || mapContainerRef.current.clientWidth < 10) {
+      console.log("Map container has insufficient dimensions, waiting...");
+      const checkDimensions = setTimeout(() => {
+        // Force re-render to check dimensions again
+        setIsLoading(prev => !prev);
+      }, 500);
+      return () => clearTimeout(checkDimensions);
+    }
+
     const L = leaflet;
     
-    if (!mapRef.current) {
-      try {
-        // Default center on a general area (can be adjusted)
-        const map = L.map("map").setView([20.5937, 78.9629], 5);
-        
-        // Add OpenStreetMap tile layer
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          maxZoom: 19,
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-        
-        // Create layers for stops and route
-        stopsLayerRef.current = L.layerGroup().addTo(map);
-        mapRef.current = map;
-        
-        console.log("Map initialized successfully");
-      } catch (error) {
-        console.error('Error initializing map:', error);
-        toast({
-          title: "Error",
-          description: "Failed to initialize map. Please check your console for details.",
-          variant: "destructive"
-        });
-      }
+    try {
+      console.log(`Initializing map with dimensions: ${mapContainerRef.current.clientWidth}x${mapContainerRef.current.clientHeight}`);
+      
+      // Default center on a general area (can be adjusted)
+      const map = L.map(mapContainerRef.current, {
+        attributionControl: true,
+        zoomControl: true,
+        minZoom: 2,
+        maxZoom: 18
+      }).setView([20.5937, 78.9629], 5);
+      
+      // Add OpenStreetMap tile layer
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+      
+      // Create layers for stops and route
+      stopsLayerRef.current = L.layerGroup().addTo(map);
+      mapRef.current = map;
+      setMapInitialized(true);
+      
+      console.log("Map initialized successfully");
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize map. Please check your console for details.",
+        variant: "destructive"
+      });
     }
 
     // Cleanup on unmount
@@ -154,13 +178,21 @@ export function Map({
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
+        setMapInitialized(false);
       }
     };
-  }, [leaflet]);
+  }, [leaflet, mapInitialized, isLoading]);
+
+  // Debug log to check container dimensions
+  useEffect(() => {
+    if (mapContainerRef.current) {
+      console.log(`Map container dimensions: ${mapContainerRef.current.clientWidth}x${mapContainerRef.current.clientHeight}`);
+    }
+  }, [mapContainerRef.current?.clientWidth, mapContainerRef.current?.clientHeight]);
 
   // Update bus location
   useEffect(() => {
-    if (!leaflet || !mapRef.current || !busLocation) return;
+    if (!leaflet || !mapRef.current || !busLocation || !mapInitialized) return;
     const L = leaflet;
     const map = mapRef.current;
 
@@ -220,11 +252,11 @@ export function Map({
         }
       }
     }
-  }, [busLocation, selectedStop, hasNotified, leaflet]);
+  }, [busLocation, selectedStop, hasNotified, leaflet, mapInitialized]);
 
   // Update stops on map
   useEffect(() => {
-    if (!leaflet || !mapRef.current || !stopsLayerRef.current) return;
+    if (!leaflet || !mapRef.current || !stopsLayerRef.current || !mapInitialized) return;
     const L = leaflet;
     const map = mapRef.current;
 
@@ -259,11 +291,11 @@ export function Map({
         marker.openPopup();
       }
     });
-  }, [stops, selectedStop, onStopSelect, leaflet]);
+  }, [stops, selectedStop, onStopSelect, leaflet, mapInitialized]);
 
   // Update route path
   useEffect(() => {
-    if (!leaflet || !mapRef.current) return;
+    if (!leaflet || !mapRef.current || !mapInitialized) return;
     const L = leaflet;
     const map = mapRef.current;
 
@@ -288,7 +320,7 @@ export function Map({
         padding: [50, 50]
       });
     }
-  }, [routePoints, leaflet]);
+  }, [routePoints, leaflet, mapInitialized]);
 
   return (
     <div className="relative w-full h-full">

@@ -26,11 +26,11 @@ export function Map({
     mapInitialized
   } = useMapInitialization(leaflet, isLoading, setIsLoading);
 
-  // Handle bus location updates
-  useBusLocation(leaflet, mapRef, busLocation, selectedStop, mapInitialized);
+  // Handle bus location updates (updated parameter order)
+  useBusLocation(leaflet, mapRef, mapInitialized, busLocation, selectedStop);
   
-  // Handle stops on the map
-  useStops(leaflet, mapRef, stopsLayerRef, stops, selectedStop, onStopSelect, mapInitialized);
+  // Handle stops on the map (updated parameter order)
+  useStops(leaflet, mapRef, stopsLayerRef, stops, mapInitialized, selectedStop, onStopSelect);
   
   // Handle route display
   useRoute(leaflet, mapRef, routePoints, mapInitialized);

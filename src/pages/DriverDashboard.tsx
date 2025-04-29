@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ref, set, onValue } from "firebase/database";
 import { database, auth } from "@/lib/firebase";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
-import { Map } from "@/components/Map";
+import { Map } from "@/components/map";  // Fixed import path (lowercase 'map')
 import { Bus, RoutePoint, UserLocation } from "@/types";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

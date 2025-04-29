@@ -1,6 +1,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { LeafletMap, LeafletLayerGroup } from './types';
+import { toast } from "@/hooks/use-toast";
 
 export const useMapInitialization = (
   leaflet: any, 
@@ -21,7 +22,7 @@ export const useMapInitialization = (
       console.log("Map container has insufficient dimensions, waiting...");
       const checkDimensions = setTimeout(() => {
         // Force re-render to check dimensions again
-        setIsLoading(prev => !prev);
+        setIsLoading(!isLoading); // Fix: Pass a boolean instead of a function
       }, 500);
       return () => clearTimeout(checkDimensions);
     }
@@ -73,7 +74,7 @@ export const useMapInitialization = (
         setMapInitialized(false);
       }
     };
-  }, [leaflet, mapInitialized, isLoading]);
+  }, [leaflet, mapInitialized, isLoading, setIsLoading]);
 
   return {
     mapRef,
@@ -82,6 +83,3 @@ export const useMapInitialization = (
     mapInitialized
   };
 };
-
-// Import the toast function at the top
-import { toast } from "@/hooks/use-toast";

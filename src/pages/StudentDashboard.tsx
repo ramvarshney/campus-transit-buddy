@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
 import { database } from "@/lib/firebase";
-import { Map } from "@/components/Map";
+import { Map } from "@/components/map";  // Fixed import path (lowercase 'map')
 import { Bus, BusStop, RoutePoint, UserLocation } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

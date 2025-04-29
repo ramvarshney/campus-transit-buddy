@@ -8,9 +8,9 @@ export const useStops = (
   mapRef: React.RefObject<LeafletMap>,
   stopsLayerRef: React.RefObject<LeafletLayerGroup>,
   stops: BusStop[],
+  mapInitialized: boolean,
   selectedStop?: BusStop,
-  onStopSelect?: (stop: BusStop) => void,
-  mapInitialized: boolean
+  onStopSelect?: (stop: BusStop) => void
 ) => {
   // Update stops on map
   useEffect(() => {

@@ -7,13 +7,13 @@ import { toast } from '@/hooks/use-toast';
 export const useBusLocation = (
   leaflet: any,
   mapRef: React.RefObject<LeafletMap>,
+  mapInitialized: boolean,
   busLocation?: {
     lat: number;
     lng: number;
     timestamp?: number;
   },
-  selectedStop?: BusStop,
-  mapInitialized: boolean
+  selectedStop?: BusStop
 ) => {
   const busMarkerRef = useRef<LeafletMarker | null>(null);
   const notificationCircleRef = useRef<LeafletCircle | null>(null);

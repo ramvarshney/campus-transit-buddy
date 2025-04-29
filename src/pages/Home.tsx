@@ -10,7 +10,7 @@ export default function Home() {
       <section className="py-12 md:py-20">
         <div className="text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-            Campus Transit <span className="text-primary">Buddy</span>
+            Campus <span className="text-primary">Ride</span>
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Track your campus bus in real-time, get ETA updates, and never miss a ride again.
@@ -34,7 +34,7 @@ export default function Home() {
 
       {/* Features Section */}
       <section className="py-12 md:py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">Why Use Campus Transit Buddy?</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">Why Use Campus Ride?</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Feature 1 */}
           <Card>

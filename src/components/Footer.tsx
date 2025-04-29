@@ -1,5 +1,6 @@
 
 import { Link } from "react-router-dom";
+import { Instagram, Phone } from "lucide-react";
 
 export function Footer() {
   return (
@@ -8,7 +9,7 @@ export function Footer() {
         <div className="md:flex md:justify-between">
           <div className="mb-6 md:mb-0">
             <Link to="/" className="flex items-center">
-              <span className="text-xl font-semibold">CampusTracker</span>
+              <span className="text-xl font-semibold">CampusRide</span>
             </Link>
             <p className="mt-2 max-w-md text-sm text-muted-foreground">
               Track your campus bus in real-time and never miss a ride again.
@@ -60,10 +61,17 @@ export function Footer() {
         <hr className="my-6 border-gray-200 dark:border-gray-700" />
         <div className="sm:flex sm:items-center sm:justify-between">
           <span className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} CampusTracker. All Rights Reserved.
+            © {new Date().getFullYear()} CampusRide. All Rights Reserved.
           </span>
           <div className="mt-4 flex space-x-6 sm:mt-0">
-            {/* Social Media Icons would go here */}
+            <a href="https://www.instagram.com/the_k.r.v" className="text-muted-foreground hover:text-primary" target="_blank" rel="noopener noreferrer">
+              <Instagram className="h-4 w-4" />
+              <span className="ml-1 text-xs">the_k.r.v</span>
+            </a>
+            <a href="tel:8192036602" className="text-muted-foreground hover:text-primary">
+              <Phone className="h-4 w-4" />
+              <span className="ml-1 text-xs">8192036602</span>
+            </a>
           </div>
         </div>
       </div>
